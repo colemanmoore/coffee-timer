@@ -42,8 +42,23 @@ var
 
 ready(function() {
 
-  loadSounds();
+  /* Load the sound files */
+  Object.keys(soundUrls).forEach(function(key) {
+    var request = new XMLHttpRequest(), url = soundUrls[key];
+    request.open('GET', url);
+    request.responseType = 'arraybuffer';
+    // Decode asynchronously
+    request.onload = function() {
+      audioCtx.decodeAudioData(request.response, function(buffer) {
+        soundBuffers[key] = buffer;
+      }, function() {
+        console.log('error loading ' + url);
+      });
+    };
+    request.send();
+  });
 
+  /* Set up button listeners */
   var button = document.getElementById(BTN_1_ID);
   button.addEventListener('touchstart', toggleBeingTouched);
   button.addEventListener('touchend', function(e) {
@@ -59,35 +74,14 @@ function stateSwitch() {
     case TIMER_IDLE:
       startPhase1();
       break;
-    case TIMER_PHASE_1:
-      break;
-    case TIMER_PHASE_2:
-      break;
+    case TIMER_PHASE_1:break;
+    case TIMER_PHASE_2:break;
     case TIMER_LIMBO:
       startPhase2();
       break;
-    case TIMER_DONE:
-      break;
-    default:
-      break;
+    case TIMER_DONE:break;
+    default:break;
   }
-}
-
-function loadSounds() {
-  Object.keys(soundUrls).forEach(function(key) {
-    var request = new XMLHttpRequest(), url = soundUrls[key];
-    request.open('GET', url);
-    request.responseType = 'arraybuffer';
-    // Decode asynchronously
-    request.onload = function() {
-      audioCtx.decodeAudioData(request.response, function(buffer) {
-        soundBuffers[key] = buffer;
-      }, function() {
-        console.log('error loading ' + url);
-      });
-    };
-    request.send();
-  });
 }
 
 /* Start timer for phase 1 */
@@ -100,17 +94,21 @@ function startPhase1() {
 /* Go into limbo state until user presses the button again */
 function finishPhase1() {
   timerState = TIMER_LIMBO;
+  blink();
   speak(ADD_MORE);
 }
 
 /* Start timer for phase 2 */
 function startPhase2() {
   setTimeout(finishPhase2, PHASE_2_MS);
+  stopBlink();
   speak(TWO_MIN);
 }
 
 /* Coffee is ready. Will reset to idle state after AUTO_RESET_MS */
 function finishPhase2() {
+  timerState = TIMER_DONE;
+  addClass(document.body, 'warmblue');
   speak(READY);
   setTimeout(function() {
     if (timerState != TIMER_IDLE) {
@@ -122,6 +120,8 @@ function finishPhase2() {
 /* Become idle */
 function reset() {
   timerState = TIMER_IDLE;
+  removeClass(document.body, 'blinking');
+  removeClass(document.body, 'warmblue');
 }
 
 /* Play the sound file buffered at provided key */
@@ -132,34 +132,57 @@ function speak(key) {
   source.start(0);
 }
 
-/* Pure JS to toggle touch class on button */
+/* Toggle touch class on button */
 function toggleBeingTouched(event) {
   var el = event.target;
-
-  var beingTouchedAlready;
-  if (el.classList)
-    beingTouchedAlready = el.classList.contains(BEING_TOUCHED);
-  else
-    beingTouchedAlready = new RegExp('(^| )' + BEING_TOUCHED + '( |$)', 'gi').test(el.className);
-
-  if (!beingTouchedAlready) {
-    if (el.classList)
-      el.classList.add(BEING_TOUCHED);
-    else
-      el.className += ' ' + BEING_TOUCHED;
-  } else {
-    if (el.classList)
-      el.classList.remove(BEING_TOUCHED);
-    else
-      el.className = el.className.replace(new RegExp('(^|\\b)' + BEING_TOUCHED.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
-  }
+  toggleClass(el, BEING_TOUCHED);
 }
 
-/* DOM ready */
+/* Blink background */
+function blink() {
+  addClass(document.body, 'blinking');
+}
+
+function stopBlink() {
+  removeClass(document.body, 'blinking');
+}
+
+
+/* Pure JS helpers */
+
 function ready(fn) {
   if (document.readyState != 'loading'){
     fn();
   } else {
     document.addEventListener('DOMContentLoaded', fn);
+  }
+}
+
+function hasClass(el, cls) {
+  if (el.classList)
+    return el.classList.contains(cls);
+  else
+    return new RegExp('(^| )' + cls + '( |$)', 'gi').test(el.className);
+}
+
+function addClass(el, cls) {
+  if (el.classList)
+    el.classList.add(cls);
+  else
+    el.className += ' ' + cls;
+}
+
+function removeClass(el, cls) {
+  if (el.classList)
+    el.classList.remove(cls);
+  else
+    el.className = el.className.replace(new RegExp('(^|\\b)' + cls.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+}
+
+function toggleClass(el, cls) {
+  if (hasClass(el, cls)) {
+    removeClass(el, cls);
+  } else {
+    addClass(el, cls);
   }
 }

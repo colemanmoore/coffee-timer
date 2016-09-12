@@ -2,13 +2,25 @@ body {
   background-color: #ffd461;
 }
 
+body.blinking {
+  animation: blinker 1s ease-out infinite;
+}
+
+@keyframes blinker {
+  0% { background-color: #ffd461 }
+  50% { background-color: #ff5f91 }
+  100% { background-color: #ffd461 }
+}
+
+body.warmblue {
+  background-color: #20238b;
+  transition: background-color 2s ease-in;
+}
 
 #container {
   height: 100%;
-
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-around;
   align-items: center;
 }
 
