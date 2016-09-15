@@ -58,6 +58,7 @@ ready(function() {
     stateSwitch();
   });
   button.addEventListener('mouseup', stateSwitch);
+  document.addEventListener('touchend', Hower._enableMobileAudio);
 });
 
 function stateSwitch() {
