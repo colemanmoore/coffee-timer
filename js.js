@@ -67,6 +67,16 @@ ready(function() {
     stateSwitch();
   });
   button.addEventListener('mouseup', stateSwitch);
+
+  /* Listen to document touchstart to unlock audio context on iOS */
+  document.addEventListener('touchstart', function() {
+    var buffer = myContext.createBuffer(1, 1, 22050);
+    var source = myContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(myContext.destination);
+    source.noteOn(0);
+
+  }, false);
 });
 
 function stateSwitch() {
