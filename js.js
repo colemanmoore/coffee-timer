@@ -37,25 +37,15 @@ var
 
 /* variables */
 var
-  timerState = TIMER_IDLE,
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  timerState = TIMER_IDLE;
 
 ready(function() {
 
   /* Load the sound files */
   Object.keys(soundUrls).forEach(function(key) {
-    var request = new XMLHttpRequest(), url = soundUrls[key];
-    request.open('GET', url);
-    request.responseType = 'arraybuffer';
-    // Decode asynchronously
-    request.onload = function() {
-      audioCtx.decodeAudioData(request.response, function(buffer) {
-        soundBuffers[key] = buffer;
-      }, function() {
-        console.log('error loading ' + url);
-      });
-    };
-    request.send();
+    soundBuffers[key] =  new Howl({
+      src: [soundUrls[key]]
+    });
   });
 
   /* Set up button listeners */
@@ -67,16 +57,6 @@ ready(function() {
     stateSwitch();
   });
   button.addEventListener('mouseup', stateSwitch);
-
-  /* Listen to document touchstart to unlock audio context on iOS */
-  document.addEventListener('touchstart', function() {
-    var buffer = audioCtx.createBuffer(1, 1, 22050);
-    var source = audioCtx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(audioCtx.destination);
-    source.noteOn(0);
-
-  }, false);
 });
 
 function stateSwitch() {
@@ -136,10 +116,9 @@ function reset() {
 
 /* Play the sound file buffered at provided key */
 function speak(key) {
-  var source = audioCtx.createBufferSource();
-  source.buffer = soundBuffers[key];
-  source.connect(audioCtx.destination);
-  source.start(0);
+  if (soundBuffers[key]) {
+    soundBuffers[key].play();
+  }
 }
 
 /* Toggle touch class on button */
