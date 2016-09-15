@@ -52,6 +52,7 @@ ready(function() {
   var button = document.getElementById(BTN_1_ID);
   button.addEventListener('touchstart', toggleBeingTouched);
   button.addEventListener('touchend', function(e) {
+    Howler._enableMobileAudio();
     toggleBeingTouched(e);
     e.preventDefault();
     stateSwitch();
