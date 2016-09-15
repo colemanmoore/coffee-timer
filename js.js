@@ -58,7 +58,7 @@ ready(function() {
     stateSwitch();
   });
   button.addEventListener('mouseup', stateSwitch);
-  document.addEventListener('touchend', Hower._enableMobileAudio);
+  document.addEventListener('touchend', Howler._enableMobileAudio);
 });
 
 function stateSwitch() {
