@@ -70,10 +70,10 @@ ready(function() {
 
   /* Listen to document touchstart to unlock audio context on iOS */
   document.addEventListener('touchstart', function() {
-    var buffer = myContext.createBuffer(1, 1, 22050);
-    var source = myContext.createBufferSource();
+    var buffer = audioCtx.createBuffer(1, 1, 22050);
+    var source = audioCtx.createBufferSource();
     source.buffer = buffer;
-    source.connect(myContext.destination);
+    source.connect(audioCtx.destination);
     source.noteOn(0);
 
   }, false);
